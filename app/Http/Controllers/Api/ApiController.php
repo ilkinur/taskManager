@@ -100,6 +100,13 @@ class ApiController extends Controller
 
     public function getTasks(Request $request){
         $task = Task::query();
+        $page_size = 10;
+        if($request->query('pageSize')){
+            $page_size = $request->query('pageSize');
+        }
+        if($request->query('title')){
+            $task->where('title', 'like','%'.$request->query('title').'%');
+        }
         if($request->query('status')){
             $task->where('status', $request->query('status'));
         }
@@ -109,7 +116,7 @@ class ApiController extends Controller
 
         return response()->json([
             'status'=> 'success',
-            'data'  => $task->where('user_id', auth()->id())->get()
+            'data'  => $task->where('user_id', auth()->id())->orderBy('due_date')->paginate($page_size)
         ]);
     }
 
